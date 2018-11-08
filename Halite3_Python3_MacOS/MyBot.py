@@ -31,7 +31,7 @@ while True:
 	for x in range(0,game_map.width):
 		for y in range(0,game_map.height):
 			halamounts[(x,y)] = game_map[hlt.Position(x,y)].halite_amount
-	highesthal = collections.OrderedDict(sorted(halamounts.items(), key=lambda t: t[1]))
+	highesthal = collections.OrderedDict(reversed(sorted(halamounts.items(), key=lambda t: t[1])))
 	for ship in me.get_ships():
 		if ship.halite_amount > 6*(constants.MAX_HALITE/7):
 			goback[ship.id] = True
@@ -49,16 +49,17 @@ while True:
 		elif goback[ship.id]:
 			command_queue.append(ship.move(game_map.naive_navigate(ship, yard)))
 		elif game_map[ship.position].halite_amount < constants.MAX_HALITE / 15:
-		    command_queue.append(ship.move(halamounts[1]))
+			command_queue.append(ship.move(game_map.naive_navigate(ship,hlt.Position(highesthal.popitem()[0][0],highesthal.popitem()[0][1]))))
 		else:
 			command_queue.append(ship.move(game_map.naive_navigate(ship, yard)))
-			
-		  # If you're on the first turn and have enough halite, spawn a ship.
 	# Don't spawn a ship if you currently have a ship at port, though.
 	if game.turn_number >= 1 and (me.halite_amount >= constants.SHIP_COST or (len(me.get_ships()) < 1 and me.halite_amount >= constants.SHIP_COST)) and not game_map[me.shipyard].is_occupied:
 			if game.turn_number < constants.MAX_TURNS/3 and len(me.get_ships()) < 12:
 				command_queue.append(game.me.shipyard.spawn())
 			elif len(me.get_ships()) < 1:
 				command_queue.append(game.me.shipyard.spawn())
+	 
+	halamounts = {}
+	highesthal = {}
 	# Send your moves back to the game environment, ending this turn
 	game.end_turn(command_queue)
