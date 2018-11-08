@@ -1,0 +1,2 @@
+# halite
+My halite AI
