@@ -1,0 +1,10 @@
+
+Initialization Phase
+================================================================
+error: communication error with bot: read failed, errno was: 0 (Undefined error: 0)
+Bot error output was:
+  File "MyBot.py", line 42
+    elif goback[ship.id]:
+       ^
+SyntaxError: invalid syntax
+
