@@ -12,7 +12,7 @@ import logging
 directions = ["n","s","e","w"]
 game = hlt.Game()
 # Respond with your name.
-game.ready("Well")
+game.ready("Good Sir")
 goback = {}
 yard = game.game_map[game.me.shipyard].position
 
@@ -37,11 +37,15 @@ while True:
             try:
                 command_queue.append(ship.move(random.choice(game_map.get_unsafe_moves(ship.position, yard))))
             except:
-                command_queue.append(ship.move("o"))
+                command_queue.append(ship.move((0,0)))
         elif game_map[ship.position].halite_amount > constants.MAX_HALITE / 20 and ship.halite_amount < 8*(constants.MAX_HALITE/9):
             command_queue.append(ship.stay_still())
         elif goback[ship.id]:
-            command_queue.append(ship.move(game_map.naive_navigate(ship, yard)))
+            if game_map.calculate_distance(ship.position, yard) < 2 and game_map[yard.directional_offset(hlt.Direction.North)].is_occupied and game_map[yard.directional_offset(hlt.Direction.South)].is_occupied and game_map[yard.directional_offset(hlt.Direction.East)].is_occupied and game_map[yard.directional_offset(hlt.Direction.West)].is_occupied:
+                command_queue.append(ship.move(random.choice(game_map.get_unsafe_moves(ship.position, yard))))
+            else:
+                command_queue.append(ship.move(game_map.naive_navigate(ship, yard)))
+
         elif game_map[ship.position].halite_amount < constants.MAX_HALITE / 15:
             for dir in random.sample(hlt.Direction.get_all_cardinals(),len(hlt.Direction.get_all_cardinals())):
                 if game_map.calculate_distance(ship.position.directional_offset(dir),yard) > game_map.calculate_distance(ship.position, yard):
@@ -53,7 +57,7 @@ while True:
           # If you're on the first turn and have enough halite, spawn a ship.
     # Don't spawn a ship if you currently have a ship at port, though.
     if game.turn_number >= 1 and (me.halite_amount >= constants.SHIP_COST or (len(me.get_ships()) < 1 and me.halite_amount >= constants.SHIP_COST)) and not game_map[me.shipyard].is_occupied:
-            if game.turn_number < constants.MAX_TURNS/3 and len(me.get_ships()) < 12:
+            if game.turn_number < constants.MAX_TURNS/2:
                 command_queue.append(game.me.shipyard.spawn())
             elif len(me.get_ships()) < 1:
                 command_queue.append(game.me.shipyard.spawn())
